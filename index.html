@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gerador de Sinais - Mines Betano</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white flex flex-col items-center min-h-screen p-6">
+  <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-md shadow-lg text-center">
+    <h1 class="text-2xl font-bold mb-4">🎯 Gerador de Sinais - Mines Betano</h1>
+    <p class="text-gray-400 mb-6">Modo: 2 minas | 5 casas</p>
+
+    <button onclick="gerarSinal()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition mb-4">
+      Gerar Sinal
+    </button>
+
+    <div id="tabuleiro" class="grid grid-cols-5 gap-2 mb-6"></div>
+    <div id="status" class="mb-6 text-lg font-semibold"></div>
+
+    <div class="bg-gray-700 rounded-lg p-4 max-h-64 overflow-auto">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-xl font-bold">📜 Histórico dos últimos sinais</h2>
+        <button onclick="limparHistorico()" class="text-red-400 hover:text-red-600 font-semibold">Limpar</button>
+      </div>
+      <ul id="historico" class="text-sm text-gray-300 space-y-2 max-h-52 overflow-auto"></ul>
+    </div>
+  </div>
+
+  <script>
+    let historicoSinais = [];
+
+    function gerarSinal() {
+      const casas = Array.from({ length: 25 }, (_, i) => i + 1);
+      casas.sort(() => Math.random() - 0.5);
+
+      const chance = Math.random();
+      const isBom = chance <= 0.8;
+
+      const sinal = isBom ? casas.slice(0, 5) : Array.from({ length: 5 }, () => Math.floor(Math.random() * 25) + 1);
+      const statusText = isBom ? '🔥 Sinal BOM (Alta chance de acerto)' : '⚠️ Sinal comum (chance menor)';
+
+      mostrarTabuleiro(sinal);
+      mostrarStatus(statusText);
+      adicionarHistorico(sinal, statusText);
+    }
+
+    function mostrarTabuleiro(sinal) {
+      const tabuleiroDiv = document.getElementById('tabuleiro');
+      tabuleiroDiv.innerHTML = '';
+
+      for (let i = 1; i <= 25; i++) {
+        const isNaLista = sinal.includes(i);
+        const casaDiv = document.createElement('div');
+        casaDiv.textContent = i;
+        casaDiv.className = `text-xl font-bold py-4 rounded-lg cursor-default select-none
+          flex items-center justify-center
+          ${isNaLista ? 'bg-green-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}`;
+        tabuleiroDiv.appendChild(casaDiv);
+      }
+    }
+
+    function mostrarStatus(texto) {
+      document.getElementById('status').textContent = texto;
+    }
+
+    function adicionarHistorico(sinal, statusText) {
+      const historico = document.getElementById('historico');
+      const timestamp = new Date().toLocaleTimeString();
+      const novoItem = document.createElement('li');
+      novoItem.className = 'border border-gray-600 rounded p-2 bg-gray-800';
+
+      novoItem.innerHTML = `
+        <div><strong>${timestamp}</strong> - ${statusText}</div>
+        <div>Casas: ${sinal.join(', ')}</div>
+      `;
+
+      historico.prepend(novoItem);
+      historicoSinais.unshift({ sinal, statusText });
+
+      // Limita histórico a 5 itens
+      if (historicoSinais.length > 5) {
+        historicoSinais.pop();
+        if (historico.lastChild) {
+          historico.removeChild(historico.lastChild);
+        }
+      }
+    }
+
+    function limparHistorico() {
+      document.getElementById('historico').innerHTML = '';
+      historicoSinais = [];
+    }
+  </script>
+</body>
+</html>
